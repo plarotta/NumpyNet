@@ -1,5 +1,5 @@
 # NumpyNet [WIP]
-NumpyNet is a PyTorch-free framework for deep learning implemented with Numpy. 
+NumpyNet is a PyTorch-free framework for deep learning implemented with Numpy. _It is not intended to compete with PyTorch/Keras/TensorFlow. It is mostly written for educational purposes._
 ![image](https://github.com/plarotta/NumpyNet/assets/20714356/3c41abed-eab8-4ece-8147-bc4688d6b894)
 
 ## Running
