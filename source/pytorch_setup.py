@@ -12,8 +12,6 @@ class MyNet(nn.Module):
     self.n_hidden_layers = n_hidden_layers
     self.n_hidden_units = n_hidden_units
 
-
-
     self.layers = nn.ModuleList()
     self.layers.append(nn.Linear(self.in_size, self.n_hidden_units))
     for _ in range(self.n_hidden_layers-1):
@@ -29,7 +27,6 @@ class MyNet(nn.Module):
       x = self.layers[layer_idx](x)
       x = self.relu(x)
     x = self.layers[-1](x)
-
     return x
 
   def inference(self, x):

@@ -1,14 +1,14 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from utilities import *
-from models import MLP
+from source.utilities import *
+from source.models import MLP
 
 
-
-if __name__ == '__main__':
-    # dataset generation
-    X,y = generate_dataset()
+def main():
+    X = np.loadtxt("data/test_data_x.txt")
+    y = np.loadtxt("data/test_data_y.txt")
+    y = y.reshape((len(y),1))
     trainset, testset = test_train_split(X, y, 0.8)
 
     # create model architecture
@@ -27,3 +27,9 @@ if __name__ == '__main__':
     plt.ylabel("loss")
     plt.title("Training Loss")
     plt.show()
+
+
+if __name__ == '__main__':
+    main()
+
+
