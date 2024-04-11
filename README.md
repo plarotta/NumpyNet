@@ -1,5 +1,5 @@
 # NumpyNet [WIP]
-NumpyNet is a Numpy-only deep learning framework for Python. _It is not intended to compete with PyTorch/Keras/TensorFlow. It is mostly for educational purposes._
+NumpyNet is a Numpy-only multi-layer perceptron (MLP) implementation in Python. _It is not intended to compete with PyTorch/Keras/TensorFlow. It is just for educational purposes._
 ![image](https://github.com/plarotta/NumpyNet/assets/20714356/3c41abed-eab8-4ece-8147-bc4688d6b894)
 
 ## Running
