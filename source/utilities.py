@@ -1,10 +1,9 @@
 import numpy as np
-import random
-import pandas as pd
 import matplotlib.pyplot as plt
 
 
 def test_train_split(x_data, y_data, train_fraction = 0.8):
+    '''generate test-train split from input data'''
     dataset = [(x,y) for x,y in zip(np.array(x_data), np.array(y_data))]
     np.random.shuffle(dataset)
     split_idx = int(len(dataset)*train_fraction)
@@ -16,11 +15,9 @@ def test_train_split(x_data, y_data, train_fraction = 0.8):
 
 def check_decision_boundary(trained_net):
     points = np.random.uniform(-2,2,(75000,2))
-
     d = np.argmax(np.array([trained_net.net_feedforward(p.reshape(2,1))[-1][-1] for p in points]),axis=1).flatten()
     scatter = plt.scatter(points[:,0], points[:,1], c=d, s=4)
     plt.legend(handles=scatter.legend_elements()[0], labels=["0","1","2"])
-
     plt.title(" MLP Decision Boundary")
     return(d)
 

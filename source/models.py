@@ -1,6 +1,6 @@
 from tqdm import tqdm
 import numpy as np
-from abc import ABC, abstractmethod
+from source.layers import *
 
 
 class MLP():
@@ -18,7 +18,10 @@ class MLP():
         self.layers = []
         self.trained = False
 
-    def add_layer(self, layer_type: str, in_size: int, out_size: int):
+    def add_layer(self, 
+                  layer_type: str, 
+                  in_size: int, 
+                  out_size: int) -> None:
       '''Method for adding layers to the model. Layers are defined as hidden, output,
       or loss, and the main reason for this is simply so we can treat the weights of 
       each layer appropriately. 
@@ -48,7 +51,8 @@ class MLP():
       # update self.layers
       self.layers.append(layer)
 
-    def net_feedforward(self, x: np.array) -> tuple[list,list]:
+    def net_feedforward(self, 
+                        x: np.array) -> tuple[list,list]:
         '''Base feedforward method for an MLP network. The input is sent through
         each layer sequentially, and the activations & outputs at each are tracked
         and returned by this method at the end.
@@ -76,8 +80,7 @@ class MLP():
     def net_backprop(self, 
                      y: np.array, 
                      z_vals: list[np.array], 
-                     activation_vals: list[np.array]
-                     ) -> tuple[list,list]:
+                     activation_vals: list[np.array]) -> tuple[list,list]:
         '''Base backpropagation method for an MLP network. The loss is computed
         at the loss layer, and the gradients are propagated back through the layers
         all the way to the first layer. 
@@ -114,7 +117,10 @@ class MLP():
 
         return((list(reversed(bias_deltas)), list(reversed(weight_deltas))))
 
-    def process_mini_batch(self, mini_batch: list, lr: float, alpha: float):
+    def process_mini_batch(self, 
+                           mini_batch: list, 
+                           lr: float, 
+                           alpha: float) -> float:
         '''Method which runs the training routine on a single minibatch of data.
         Each sample is fed through the network, and then its gradients are 
         propagated back. The gradients are accumulated across the samples in the 
@@ -189,7 +195,7 @@ class MLP():
         Returns:
             Log of training losses.
         '''
-        
+
         n = len(dataset)
         losses = []
         eval_acc = 0.0
@@ -203,142 +209,16 @@ class MLP():
                   loss = self.process_mini_batch(mini_batch, lr, alpha)
                   batch_loss += loss
               eval_acc = self.evaluate(eval_data)
-              pbar.set_postfix({'t_loss':batch_loss[0]/batch_size, 'epoch':j+1, 'v_acc': eval_acc}, refresh=False)
+              pbar.set_postfix({'train_loss':batch_loss[0]/batch_size, 'epoch':j+1, 'val_acc': eval_acc}, refresh=False)
               losses.append(batch_loss/batch_size)
         
         self.trained = True
         return losses
 
-    def evaluate(self, val_data):
-        '''TODO: function desc'''
-
+    def evaluate(self, 
+                 val_data: np.array) -> float:
         test_results = [
             [np.argmax(self.net_feedforward(x.reshape(len(x),1))[-1][-1]), y[0]] for (x, y) in val_data
         ]
         res = np.array(test_results)
         return(np.sum(res[:,0] == res[:,1])/len(res))
-
-class Layer(ABC):
-    '''Base class for the layer subclasses.'''
-    @abstractmethod
-    def feedforward(self):
-        pass
-    def backprop(self):
-        pass
-
-class HiddenLayer(ABC):
-    '''Class defining ff and backprop methods for hidden layers. 
-    
-    Attributes:
-        weights (np.array)
-        biases (np.array)
-        in_dim (int): size of the input layer
-        out_dim (int): size of the output layer (i.e. 2 for binary classification)
-        layer_type (str): layer type identifier'''
-    
-    def __init__(self, in_size, out_size):
-        self.weights = np.random.randn(in_size, out_size)
-        self.biases = np.random.randn(out_size, 1)
-        self.in_dim = in_size
-        self.out_dim= out_size
-        self.layer_type = "H"
-
-    def relu(self, x):
-        return np.maximum(0,x)
-
-    def leaky_relu(self, x):
-        alpha = 0.1
-        return np.maximum(alpha*x, x)
-
-    def leaky_relu_prime(self, x):
-        '''derivative of leaky relu function'''
-        x_copy = np.copy(x)
-        x_copy[x_copy > 0] = 1.0
-        x_copy[x_copy < 0] = 0.1
-        return(x_copy)
-
-    def relu_prime(self,x):
-        '''derivative of relu function'''
-        x_copy = np.copy(x)
-        x_copy[x_copy > 0] = 1.0
-        x_copy[x_copy < 0] = 0.0
-        return(x_copy)
-
-    def feedforward(self, x):
-        Z = self.weights.T@x+self.biases
-        activated_Z = self.relu(Z)
-        return((Z, activated_Z))
-
-    def backprop(self, layer_input, grad_h, h, y):
-        f = self.relu_prime(h)
-        grad_bias = np.multiply(f, grad_h)
-        grad_weight = layer_input@(grad_bias.T)
-        grad_h_to_pass =  self.weights@grad_h
-        return((grad_weight, grad_bias, grad_h_to_pass))
-
-
-class OutputLayer(ABC):
-    '''Class defining ff and backprop methods for output layers. 
-    
-    Attributes:
-        weights (np.array)
-        biases (np.array)
-        in_dim (int): size of the input layer
-        out_dim (int): size of the output layer (i.e. 2 for binary classification)
-        layer_type (str): layer type identifier'''
-    
-    def __init__(self, in_size, out_size):
-        self.weights = np.random.randn(in_size, out_size)
-        self.biases = np.random.randn(out_size, 1)
-        self.in_dim = in_size
-        self.out_dim = out_size
-        self.layer_type = "O"
-
-    def relu(self, x):
-        return np.maximum(0,x)
-
-    def leaky_relu(self, x):
-        alpha = 0.1
-
-        return np.maximum(alpha*x, x)
-
-    def feedforward(self, x: np.array):
-        input_copy = np.copy(x)
-        Z = self.weights.T@input_copy+self.biases
-        activated_Z = np.exp(Z)/np.sum(np.exp(Z)+ 1e-11)
-        assert Z.shape == activated_Z.shape, "output layer ff error"
-
-        return((Z, activated_Z))
-
-    def backprop(self, layer_input, grad_z, Z, y):
-        grad_weight = layer_input@(grad_z.T)
-        grad_bias = np.copy(grad_z)
-
-        grad_h = self.weights@grad_z
-
-        return((grad_weight, grad_bias, grad_h))
-
-class LossLayer(ABC):
-    '''Class defining ff and backprop methods for loss layers. In this project 
-    I embed the loss function into the network by making it a layer type of 
-    its own.
-    
-    Attributes:
-        in_dim (int): size of the input layer
-        out_dim (int): size of the output layer (i.e. 2 for binary classification)
-        layer_type (str): layer type identifier'''
-    def __init__(self, in_size, out_size):
-        self.in_dim = in_size
-        self.out_dim= out_size
-        self.layer_type = "L"
-
-    def feedforward(self, y, z):
-        '''cross-entropy loss'''
-        loss = -z[int(y)] + np.log(np.sum(np.exp(z)) + 1e-11)
-        return(loss)
-
-    def backprop(self, Z, y):
-        y_hot = np.zeros((self.out_dim,1))
-        y_hot[int(y)] = 1.0
-        grad_Z = -1*y_hot + np.exp(Z)/np.sum(np.exp(Z) + 1e-11)
-        return((grad_Z))
