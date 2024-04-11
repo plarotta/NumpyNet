@@ -1,5 +1,4 @@
 import numpy as np
-import pandas as pd
 import matplotlib.pyplot as plt
 from source.utilities import *
 from source.models import MLP
@@ -30,14 +29,6 @@ def main():
 
 
 if __name__ == '__main__':
-    # main()
-    NN = MLP()
-    NN.add_layer('Hidden', in_size=5, out_size=64)
-    NN.add_layer('Hidden', in_size=64, out_size=128)
-    NN.add_layer('Output', in_size=128, out_size=2)
-    NN.add_layer('Loss', in_size=2, out_size=2)
-    for l in NN.layers:
-        if l.layer_type != "L":
-            print(l.weights.shape, l.biases.shape)
+    main()
 
 
